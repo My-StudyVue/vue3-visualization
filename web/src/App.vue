@@ -2,21 +2,44 @@
   <div class="box" :style="{ background: `url(${bg})` }">
     <div class="box-left"></div>
     <div class="box-center" id="china" ref="china"></div>
-    <div class="box-right"></div>
+    <div class="box-right" style="color:white">
+     <table border="1" cellspacing="0" class="table">
+      <thead>
+        <tr>
+          <th>地区</th>
+          <th>新增确诊</th>
+          <th>累计确诊</th>
+          <th>治愈</th>
+          <th>死亡</th>
+        </tr>
+      </thead>
+      <transition-group tag="tbody" enter-active-class="animate__animated animate__flipInY">
+        <tr v-for="(item,index) in  store.item" :key="item.name">
+          <th align="center">{{item.name}}</th>
+          <th align="center">{{item.today.confirm}}</th>
+          <th align="center">{{item.total.confirm}}</th>
+          <th align="center">{{item.total.heal}}</th>
+          <th align="center">{{item.total.dead}}</th>
+        </tr>
+      </transition-group>
+     </table>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import bg from "@/assets/bg.png";
 import { useStore } from "@/stores/index";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import "assets/js/china";
 import { geoCoordMap } from "@/assets/ts/geoMap";
+import "animate.css"
 
 // import echarts from 'echarts' //v4
 // import * as echarts from 'echarts' //v5
 
-const store = useStore();
+const store = useStore()
+  let charts:any = null
 
 onMounted(async () => {
   await store.getList();
@@ -26,16 +49,19 @@ onMounted(async () => {
 
 const initCharts = () => {
   const province = store.list.diseaseh5Shelf.areaTree[0].children;
+  // 默认展示吉林
+  store.item = province[9].children
   const data = province.map((v) => ({
     name: v.name,
     value: geoCoordMap[v.name].concat(v.total.nowConfirm),
+    children: v.children,
   }));
-  console.log(province, "==province");
-  const charts = (window as any).echarts.init(
+
+  charts = (window as any).echarts.init(
     document.querySelector("#china") as HTMLElement
   );
 
-  charts.setOption({
+  const option = {
     geo: {
       map: "china",
       aspectScale: 0.8,
@@ -137,13 +163,40 @@ const initCharts = () => {
         data: data,
       },
     ],
-  });
+  };
+
+  charts.setOption(option)
+
+chartsClick()
 };
+
+const chartsClick =() =>{
+  charts.on('click',(e:any) => {
+    store.item = e.data.children
+  })
+
+}
 </script>
 <style lang="less">
 * {
   padding: 0;
   margin: 0;
+}
+
+.table {
+  width: 100%;
+  background: #212028;
+  tr {
+    th {
+      padding: 5px;
+      white-space: nowrap;
+    }
+    td {
+      padding: 5px 10px;
+      width: 100px;
+      white-space: nowrap;
+    }
+  }
 }
 
 html,
