@@ -19,7 +19,7 @@ export default defineConfig({
     extensions: [".js", ".vue", ".json", ".ts"], // 引入对应的文件时可以忽略其后缀
   },
   server: {
-    // host: true,
+    host: true,
     port: 3000,
     strictPort: true,
     open: true,
