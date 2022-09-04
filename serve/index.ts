@@ -9,6 +9,13 @@ const router: Router = express.Router({
   mergeParams: true, //表示合并 url参数
 })
 
+// 跨域
+app.use('*', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+
+  next();
+})
+
 app.use('/api', router)
 
 // json 格式接收
