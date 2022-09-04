@@ -13,6 +13,8 @@
       </div>
 
       <div id="pie" class="box-left-pie"></div>
+
+      <div id="line" class="box-left-line"></div>
     </div>
 
     <div class="box-center" id="china" ref="china"></div>
@@ -59,12 +61,14 @@ import "animate.css";
 const store = useStore();
 let charts: any = null;
 let pie: any = null;
+let line: any = null;
 
 onMounted(async () => {
   await store.getList();
 
   initCharts();
   initPie();
+  initLine();
 });
 
 const initCharts = () => {
@@ -234,6 +238,47 @@ const initPie = () => {
   };
   pie.setOption(option);
 };
+
+const initLine = () => {
+  line = (window as any).echarts.init(
+    document.querySelector("#line") as HTMLElement
+  );
+
+  const option = {
+    backgroundColor: "#223651",
+    tooltip: {
+      trigger: "axis",
+    },
+    xAxis: {
+      type: "category",
+      data: store.cityDetail.map((v) => v.city),
+      axisLine: {
+        lineStyle: {
+          color: "#fff",
+        },
+      },
+    },
+    yAxis: {
+      type: "value",
+      axisLine: {
+        lineStyle: {
+          color: "#fff",
+        },
+      },
+    },
+    label: {
+      show: true,
+    },
+    series: [
+      {
+        data: store.cityDetail.map((v) => v.nowConfirm),
+        type: "line",
+        smooth: true,
+      },
+    ],
+  };
+  line.setOption(option);
+};
 </script>
 
 <style lang="less">
@@ -308,6 +353,11 @@ body,
 
     &-pie {
       height: 350px;
+      margin-top: 20px;
+    }
+
+    &-line {
+      height: 320px;
       margin-top: 20px;
     }
   }
