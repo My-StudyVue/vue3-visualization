@@ -212,7 +212,6 @@ const initPie = () => {
     },
     series: [
       {
-        name: "Access From",
         type: "pie",
         radius: ["40%", "70%"],
         itemStyle: {
