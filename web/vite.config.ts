@@ -11,8 +11,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      assets: fileURLToPath(new URL("./src/assets", import.meta.url)),
-      echarts: fileURLToPath(
+      "assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
+      "echarts": fileURLToPath(
         new URL("./src/assets/js/echarts.min.js", import.meta.url)
       ),
     },

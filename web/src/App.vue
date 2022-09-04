@@ -11,22 +11,29 @@ import bg from "@/assets/bg.png";
 import { useStore } from "@/stores/index";
 import { onMounted } from "vue";
 import "assets/js/china";
+import { geoCoordMap } from "@/assets/ts/geoMap";
 
 // import echarts from 'echarts' //v4
 // import * as echarts from 'echarts' //v5
 
 const store = useStore();
-store.getList();
 
-onMounted(() => {
+onMounted(async () => {
+  await store.getList();
+
   initCharts();
 });
 
-// const echarts = window.echarts;
-console.log(window, window.echarts, echarts, "===vue中import echarts from ");
-
 const initCharts = () => {
-  const charts = echarts.init(document.querySelector("#china") as HTMLElement);
+  const province = store.list.diseaseh5Shelf.areaTree[0].children;
+  const data = province.map((v) => ({
+    name: v.name,
+    value: geoCoordMap[v.name].concat(v.total.nowConfirm),
+  }));
+  console.log(province, "==province");
+  const charts = (window as any).echarts.init(
+    document.querySelector("#china") as HTMLElement
+  );
 
   charts.setOption({
     geo: {
@@ -110,7 +117,7 @@ const initCharts = () => {
             color: "#fff",
           },
         },
-        // data: data,
+        data: data,
       },
       {
         type: "scatter",
@@ -127,7 +134,7 @@ const initCharts = () => {
         itemStyle: {
           color: "#1E90FF", //标志颜色
         },
-        // data: data,
+        data: data,
       },
     ],
   });
@@ -150,12 +157,15 @@ body,
   height: 100%;
   display: flex;
   overflow: hidden;
+
   &-left {
     width: 400px;
   }
+
   &-center {
     flex: 1;
   }
+
   &-right {
     width: 400px;
   }
