@@ -1,18 +1,23 @@
 <template>
   <div class="box" :style="{ background: `url(${bg})` }">
-    <div class="box-left" style="color:white">
+    <div class="box-left" style="color: white">
       <div class="box-left-card">
-        <section v-for="(leftItem,leftIndex) in store.letfList" :key="leftIndex">
-          <div>较上日+ {{leftItem.addNum}}</div>
-          <div>{{leftItem.totalNum}}</div>
-          <div>{{leftItem.title}}</div>
+        <section
+          v-for="(leftItem, leftIndex) in store.letfList"
+          :key="leftIndex"
+        >
+          <div>较上日+ {{ leftItem.addNum }}</div>
+          <div>{{ leftItem.totalNum }}</div>
+          <div>{{ leftItem.title }}</div>
         </section>
       </div>
+
+      <div id="pie" class="box-left-pie"></div>
     </div>
 
     <div class="box-center" id="china" ref="china"></div>
 
-    <div class="box-right" style="color:white">
+    <div class="box-right" style="color: white">
       <table border="1" cellspacing="0" class="table">
         <thead>
           <tr>
@@ -23,13 +28,16 @@
             <th>死亡</th>
           </tr>
         </thead>
-        <transition-group tag="tbody" enter-active-class="animate__animated animate__flipInY">
-          <tr v-for="(item,index) in  store.item" :key="item.name">
-            <th align="center">{{item.name}}</th>
-            <th align="center">{{item.today.confirm}}</th>
-            <th align="center">{{item.total.confirm}}</th>
-            <th align="center">{{item.total.heal}}</th>
-            <th align="center">{{item.total.dead}}</th>
+        <transition-group
+          tag="tbody"
+          enter-active-class="animate__animated animate__flipInY"
+        >
+          <tr v-for="item in store.item" :key="item.name">
+            <th align="center">{{ item.name }}</th>
+            <th align="center">{{ item.today.confirm }}</th>
+            <th align="center">{{ item.total.confirm }}</th>
+            <th align="center">{{ item.total.heal }}</th>
+            <th align="center">{{ item.total.dead }}</th>
           </tr>
         </transition-group>
       </table>
@@ -40,27 +48,29 @@
 <script setup lang="ts">
 import bg from "@/assets/bg.png";
 import { useStore } from "@/stores/index";
-import { onMounted, ref } from "vue";
+import { onMounted } from "vue";
 import "assets/js/china";
 import { geoCoordMap } from "@/assets/ts/geoMap";
-import "animate.css"
+import "animate.css";
 
 // import echarts from 'echarts' //v4
 // import * as echarts from 'echarts' //v5
 
-const store = useStore()
-let charts:any = null
+const store = useStore();
+let charts: any = null;
+let pie: any = null;
 
 onMounted(async () => {
   await store.getList();
 
   initCharts();
+  initPie();
 });
 
 const initCharts = () => {
   const province = store.list.diseaseh5Shelf.areaTree[0].children;
   // 默认展示吉林
-  store.item = province[9].children
+  store.item = province[9].children;
   const data = province.map((v) => ({
     name: v.name,
     value: geoCoordMap[v.name].concat(v.total.nowConfirm),
@@ -175,19 +185,57 @@ const initCharts = () => {
     ],
   };
 
-  charts.setOption(option)
+  charts.setOption(option);
 
-chartsClick()
+  chartsClick();
 };
 
-const chartsClick =() =>{
-  charts.on('click',(e:any) => {
-    store.item = e.data.children
-  })
-}
+const chartsClick = () => {
+  charts.on("click", (e: any) => {
+    store.item = e.data.children;
+  });
+};
 
+const initPie = () => {
+  pie = (window as any).echarts.init(
+    document.querySelector("#pie") as HTMLElement
+  );
 
+  const option = {
+    backgroundColor: "#223651",
+    tooltip: {
+      trigger: "item",
+    },
+    series: [
+      {
+        name: "Access From",
+        type: "pie",
+        radius: ["40%", "70%"],
+        itemStyle: {
+          borderRadius: 4,
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+        label: {
+          show: true,
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: "15",
+          },
+        },
+        data: store.cityDetail.map((v: any) => ({
+          name: v.city,
+          value: v.nowConfirm,
+        })),
+      },
+    ],
+  };
+  pie.setOption(option);
+};
 </script>
+
 <style lang="less">
 * {
   padding: 0;
@@ -243,18 +291,24 @@ body,
       section {
         background: @itemBg;
         border: 1px solid @itemBorder;
-        padding:10px;
+        padding: 10px;
         display: flex;
         flex-direction: column;
         align-items: center;
 
-        div:nth-child(2){ //选中第二个值
-          color:@itemColor;
-          padding:10px 0;
+        div:nth-child(2) {
+          //选中第二个值
+          color: @itemColor;
+          padding: 10px 0;
           font-size: 20px;
           font-weight: bold;
         }
       }
+    }
+
+    &-pie {
+      height: 350px;
+      margin-top: 20px;
     }
   }
 
